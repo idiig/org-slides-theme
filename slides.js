@@ -293,4 +293,30 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   syncToc();
+
+  // Code block lightbox
+  var modal = document.createElement("div");
+  modal.id = "code-modal";
+  modal.innerHTML = "<div id=\"code-modal-inner\"></div>";
+  document.body.appendChild(modal);
+
+  function openModal(srcContainer) {
+    var clone = srcContainer.cloneNode(true);
+    clone.querySelectorAll(".step-hidden").forEach(function(el) { el.classList.remove("step-hidden"); });
+    var inner = document.getElementById("code-modal-inner");
+    inner.innerHTML = "";
+    inner.appendChild(clone);
+    modal.classList.add("active");
+  }
+  function closeModal() { modal.classList.remove("active"); }
+
+  document.querySelectorAll("div.org-src-container").forEach(function(el) {
+    el.style.cursor = "pointer";
+    el.addEventListener("click", function(e) { e.stopPropagation(); openModal(el); });
+  });
+
+  modal.addEventListener("click", closeModal);
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && modal.classList.contains("active")) { closeModal(); }
+  });
 });

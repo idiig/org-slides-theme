@@ -400,3 +400,32 @@ body.presenter .slide-counter {
 /* --- Misc -------------------------------------------------- */
 strong, b { color: var(--color-accent2); font-weight: 700; }
 em, i     { font-style: italic; }
+
+/* --- Code lightbox ----------------------------------------- */
+#code-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+#code-modal.active { display: flex; }
+#code-modal-inner {
+  background: var(--color-bg, #fff);
+  border-radius: 6px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+#code-modal-inner div.org-src-container {
+  cursor: default;
+  margin: 0;
+}
+#code-modal-inner pre {
+  font-size: 1rem;
+  white-space: pre-wrap;
+}
