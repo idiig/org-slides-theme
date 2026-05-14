@@ -129,6 +129,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       }
     } else {
+      // Notes before the first step (shown immediately on slide entry)
+      var area = slide.querySelector(".outline-text-2, .outline-text-3");
+      var preNotes = [];
+      if (area && steps.length) {
+        var node = area.firstElementChild;
+        while (node && node !== steps[0]) {
+          if (node.matches("aside.notes, aside.NOTES")) preNotes.push(node);
+          node = node.nextElementSibling;
+        }
+      }
+      preNotes.forEach(function(n) {
+        var el = document.createElement("div");
+        el.className = "pnl-note-inline";
+        el.innerHTML = n.innerHTML;
+        pnlNotes.appendChild(el);
+      });
+
       steps.slice(0, stepIdx).forEach(function(step) {
         var note = noteAfterStep(step);
         if (note) {
@@ -138,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function() {
           pnlNotes.appendChild(noteEl);
         }
       });
-      if (stepIdx === 0) {
+      if (stepIdx === 0 && preNotes.length === 0) {
         var placeholder = document.createElement("em");
         placeholder.style.color = "#556";
         placeholder.textContent = "→ 右矢印でスタート";
