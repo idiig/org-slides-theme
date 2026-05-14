@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var links = Array.from(document.querySelectorAll("#text-table-of-contents a"));
 
+  // Force scroll to top after JS inserts the title slide
+  content.scrollTo({ top: 0, behavior: "instant" });
+
   // --- Presenter mode ---
   var isPresenter = location.search.indexOf("presenter") !== -1;
 
