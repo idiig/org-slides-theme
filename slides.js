@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "Escape") { if (zoomed) { e.preventDefault(); closeModal(); } return; }
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      if (zoomed) { closeModal(); goTo(currentIdx + 1, false); return; }
+      if (zoomed) { closeModal(); return; }
       if (pendingZoom) { openModal(pendingZoomEl); clearPendingZoom(); return; }
       var steps = getSteps(slides[currentIdx]);
       if (stepIdx < steps.length) {
