@@ -332,17 +332,66 @@ body.presenter aside.notes + aside.notes {
 }
 
 /* --- Presenter mode ---------------------------------------- */
-.open-audience-btn {
+body.presenter #content,
+body.presenter #table-of-contents,
+body.presenter .slide-breadcrumb,
+body.presenter .slide-counter {
+  display: none;
+}
+
+.presenter-panel {
   position: fixed;
-  top: 0.4rem;
-  right: 1rem;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 4rem 2rem;
+  background: #16213e;
+  color: #e0e0e0;
+  font-family: var(--font-sans);
+  overflow-y: auto;
+}
+
+.pnl-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin-bottom: 1.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid #2a3a5e;
+}
+
+.pnl-notes {
+  flex: 1;
+  font-size: 1.25rem;
+  line-height: 2.1;
+  color: #ddd;
+}
+
+.pnl-next {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a3a5e;
+  font-size: 0.85rem;
+  color: #607080;
+}
+
+.pnl-counter {
+  margin-top: 0.8rem;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: #506070;
+}
+
+.open-audience-btn {
+  display: inline-block;
+  margin-top: 1.2rem;
   background: var(--color-accent);
   color: #fff;
-  padding: 0.25em 0.8em;
+  padding: 0.3em 1em;
   border-radius: 3px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   text-decoration: none;
-  z-index: 200;
+  align-self: flex-start;
 }
 
 /* --- Misc -------------------------------------------------- */

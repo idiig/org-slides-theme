@@ -19,17 +19,13 @@ document.addEventListener("DOMContentLoaded", function() {
   if (titleDiv) { titleDiv.appendChild(searchInput); }
   else if (toc) { toc.insertBefore(searchInput, toc.querySelector("h2")); }
 
+  var slides = Array.from(document.querySelectorAll(".outline-2, .outline-3"));
+  if (!slides.length) return;
+
+  var links = Array.from(document.querySelectorAll("#text-table-of-contents a"));
+
   // --- Presenter mode ---
-  var isPresenter = location.search.includes("presenter");
-  if (isPresenter) {
-    document.body.classList.add("presenter");
-    var btn = document.createElement("a");
-    btn.textContent = "発表画面を開く";
-    btn.href = location.pathname;
-    btn.target = "_blank";
-    btn.className = "open-audience-btn";
-    document.body.appendChild(btn);
-  }
+  var isPresenter = location.search.indexOf("presenter") !== -1;
 
   // --- BroadcastChannel sync ---
   var syncChannel = null;
@@ -46,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
       });
       stepIdx = msg.stepIdx;
       updateCounter();
+      if (isPresenter) updatePresenterPanel();
       receiving = false;
     };
   }
@@ -55,10 +52,57 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  var slides = Array.from(document.querySelectorAll(".outline-2, .outline-3"));
-  if (!slides.length) return;
+  // --- Presenter panel ---
+  var presenterPanel = null;
+  var pnlTitle, pnlNotes, pnlNext, pnlCounter;
 
-  var links = Array.from(document.querySelectorAll("#text-table-of-contents a"));
+  function getSlideNotes(slide) {
+    var area = slide.querySelector(".outline-text-2, .outline-text-3");
+    if (!area) return [];
+    return Array.from(area.querySelectorAll(":scope > aside.notes"));
+  }
+
+  function updatePresenterPanel() {
+    if (!presenterPanel) return;
+    var slide = slides[currentIdx];
+    var h = slide.querySelector("h2, h3");
+    pnlTitle.textContent = h ? h.textContent : "";
+    var notes = getSlideNotes(slide);
+    pnlNotes.innerHTML = notes.length
+      ? notes.map(function(n) { return n.innerHTML; }).join("<br>")
+      : "<em style='color:#666'>（セリフなし）</em>";
+    var next = slides[currentIdx + 1];
+    if (next) {
+      var nh = next.querySelector("h2, h3");
+      pnlNext.textContent = "Next: " + (nh ? nh.textContent : "");
+      pnlNext.style.display = "";
+    } else {
+      pnlNext.style.display = "none";
+    }
+    pnlCounter.textContent = (currentIdx + 1) + " / " + slides.length;
+  }
+
+  if (isPresenter) {
+    document.body.classList.add("presenter");
+    presenterPanel = document.createElement("div");
+    presenterPanel.className = "presenter-panel";
+    pnlTitle   = document.createElement("div"); pnlTitle.className   = "pnl-title";
+    pnlNotes   = document.createElement("div"); pnlNotes.className   = "pnl-notes";
+    pnlNext    = document.createElement("div"); pnlNext.className    = "pnl-next";
+    pnlCounter = document.createElement("div"); pnlCounter.className = "pnl-counter";
+    presenterPanel.appendChild(pnlTitle);
+    presenterPanel.appendChild(pnlNotes);
+    presenterPanel.appendChild(pnlNext);
+    presenterPanel.appendChild(pnlCounter);
+    document.body.appendChild(presenterPanel);
+
+    var openBtn = document.createElement("a");
+    openBtn.textContent = "発表画面を開く";
+    openBtn.href = location.pathname;
+    openBtn.target = "_blank";
+    openBtn.className = "open-audience-btn";
+    presenterPanel.appendChild(openBtn);
+  }
 
   function setActive(link) {
     if (!link) return;
@@ -126,11 +170,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // --- Counter ---
+  // --- Counter (audience) ---
   var counter = document.createElement("div");
   counter.className = "slide-counter";
   document.body.appendChild(counter);
   function updateCounter() {
+    if (isPresenter) return;
     var steps = getSteps(slides[currentIdx]);
     if (steps.length && stepIdx < steps.length) {
       counter.textContent = (currentIdx + 1) + " / " + slides.length +
@@ -145,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function() {
   breadcrumb.className = "slide-breadcrumb";
   document.body.appendChild(breadcrumb);
   function updateBreadcrumb() {
+    if (isPresenter) return;
     var slide = slides[currentIdx];
     var h = slide.querySelector("h2, h3");
     if (!h) return;
@@ -164,10 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function filterToc(query) {
     var q = query.toLowerCase().trim();
     var allLi = Array.from(document.querySelectorAll("#text-table-of-contents li"));
-    if (!q) {
-      allLi.forEach(function(li) { li.style.display = ""; });
-      return;
-    }
+    if (!q) { allLi.forEach(function(li) { li.style.display = ""; }); return; }
     allLi.forEach(function(li) {
       var a = li.querySelector("a");
       li.dataset.match = (a && a.textContent.toLowerCase().includes(q)) ? "1" : "0";
@@ -199,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function() {
     updateSlideVisibility(currentIdx);
     updateCounter();
     updateBreadcrumb();
+    if (isPresenter) updatePresenterPanel();
   }
 
   content.addEventListener("scrollend", syncToc);
@@ -208,11 +252,14 @@ document.addEventListener("DOMContentLoaded", function() {
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(syncToc, 1200);
     updateSlideVisibility(currentIdx);
-    slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!isPresenter) {
+      slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     setActive(tocLinkFor(slides[currentIdx]));
     initSteps(slides[currentIdx], showAll);
     updateCounter();
     updateBreadcrumb();
+    if (isPresenter) updatePresenterPanel();
     broadcast();
   }
 
@@ -221,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "ArrowRight") {
       e.preventDefault();
       var steps = getSteps(slides[currentIdx]);
-      if (stepIdx < steps.length) {
+      if (!isPresenter && stepIdx < steps.length) {
         steps[stepIdx].classList.remove("step-hidden");
         stepIdx++;
         updateCounter();
@@ -232,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      if (stepIdx > 0) {
+      if (!isPresenter && stepIdx > 0) {
         stepIdx--;
         getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
         updateCounter();
