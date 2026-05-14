@@ -27,28 +27,29 @@ document.addEventListener("DOMContentLoaded", function() {
   // --- Presenter mode ---
   var isPresenter = location.search.indexOf("presenter") !== -1;
 
-  // --- BroadcastChannel sync ---
-  var syncChannel = null;
+  // --- localStorage sync (works across file:// tabs) ---
+  var SYNC_KEY = "org-slides-sync";
   var receiving = false;
-  try { syncChannel = new BroadcastChannel("org-slides-sync"); } catch(e) {}
-  if (syncChannel) {
-    syncChannel.onmessage = function(e) {
-      receiving = true;
-      var msg = e.data;
-      if (msg.idx !== currentIdx) goTo(msg.idx, true);
-      var steps = getSteps(slides[currentIdx]);
-      steps.forEach(function(li, i) {
-        li.classList.toggle("step-hidden", i >= msg.stepIdx);
-      });
-      stepIdx = msg.stepIdx;
-      updateCounter();
-      if (isPresenter) updatePresenterPanel();
-      receiving = false;
-    };
-  }
+
+  window.addEventListener("storage", function(e) {
+    if (e.key !== SYNC_KEY || !e.newValue) return;
+    var msg = JSON.parse(e.newValue);
+    receiving = true;
+    if (msg.idx !== currentIdx) goTo(msg.idx, true);
+    var steps = getSteps(slides[currentIdx]);
+    steps.forEach(function(li, i) {
+      li.classList.toggle("step-hidden", i >= msg.stepIdx);
+    });
+    stepIdx = msg.stepIdx;
+    updateCounter();
+    if (isPresenter) updatePresenterPanel();
+    receiving = false;
+  });
+
   function broadcast() {
-    if (syncChannel && !receiving) {
-      syncChannel.postMessage({ idx: currentIdx, stepIdx: stepIdx });
+    if (!receiving) {
+      localStorage.setItem(SYNC_KEY,
+        JSON.stringify({ idx: currentIdx, stepIdx: stepIdx, ts: Date.now() }));
     }
   }
 
