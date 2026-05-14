@@ -19,6 +19,27 @@ document.addEventListener("DOMContentLoaded", function() {
   if (titleDiv) { titleDiv.appendChild(searchInput); }
   else if (toc) { toc.insertBefore(searchInput, toc.querySelector("h2")); }
 
+  // --- Auto-generate title slide from preamble ---
+  (function() {
+    var firstOutline = content && content.querySelector(":scope > .outline-2, :scope > .outline-3");
+    if (!firstOutline) return;
+    var titleSlide = document.createElement("div");
+    titleSlide.className = "outline-2";
+    titleSlide.id = "org-title-slide";
+    var notesDiv = document.createElement("div");
+    notesDiv.className = "outline-text-2";
+    while (content.firstChild !== firstOutline) {
+      var n = content.firstChild;
+      if (n.nodeType === 1 && n.tagName.toLowerCase() === "aside") {
+        notesDiv.appendChild(n);
+      } else {
+        titleSlide.appendChild(n);
+      }
+    }
+    titleSlide.appendChild(notesDiv);
+    content.insertBefore(titleSlide, firstOutline);
+  })();
+
   var slides = Array.from(document.querySelectorAll(".outline-2, .outline-3"));
   if (!slides.length) return;
 

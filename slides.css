@@ -159,6 +159,31 @@ body {
 h1.title {
   display: none;
 }
+#org-title-slide h1.title { display: block; }
+
+/* --- Title slide ------------------------------------------- */
+#org-title-slide {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+#org-title-slide h1.title {
+  font-size: 2rem;
+  font-weight: 800;
+  border: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  color: var(--color-accent2);
+  line-height: 1.4;
+}
+#org-title-slide .org-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 2;
+}
 
 /* --- Child slides hidden until navigated to ---------------- */
 .outline-2 > .outline-3 {
