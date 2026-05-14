@@ -246,12 +246,14 @@ document.addEventListener("DOMContentLoaded", function() {
     if (isPresenter) updatePresenterPanel();
   }
 
-  content.addEventListener("scrollend", syncToc);
+  if (!isPresenter) {
+    content.addEventListener("scrollend", syncToc);
+  }
 
   function goTo(idx, showAll) {
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
     clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(syncToc, 1200);
+    if (!isPresenter) scrollTimer = setTimeout(syncToc, 1200);
     updateSlideVisibility(currentIdx);
     if (!isPresenter) {
       slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
