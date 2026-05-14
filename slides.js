@@ -93,12 +93,6 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     } else {
       steps.slice(0, stepIdx).forEach(function(step) {
-        var clone = step.cloneNode(true);
-        clone.classList.remove("step-hidden");
-        var stepEl = document.createElement("div");
-        stepEl.className = "pnl-step";
-        stepEl.appendChild(clone);
-        pnlNotes.appendChild(stepEl);
         var note = noteAfterStep(step);
         if (note) {
           var noteEl = document.createElement("div");
