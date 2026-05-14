@@ -475,12 +475,12 @@ em, i     { font-style: italic; }
 }
 .pnl-step li { list-style: disc; margin-left: 1.5rem; }
 .pnl-note-inline {
-  margin: 0.3rem 0 0.8rem 1.5rem;
-  padding: 0.4rem 0.9rem;
-  background: rgba(240,192,64,0.12);
-  border-left: 3px solid #f0c040;
-  border-radius: 0 3px 3px 0;
-  font-size: 1rem;
-  line-height: 1.8;
+  display: inline;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1.4rem;
+  line-height: 2;
   color: #f0e0a0;
 }
