@@ -160,6 +160,14 @@ h1.title {
   display: none;
 }
 
+/* --- Child slides hidden until navigated to ---------------- */
+.outline-2 > .outline-3 {
+  visibility: hidden;
+}
+.outline-2 > .outline-3.slide-visible {
+  visibility: visible;
+}
+
 /* --- Slides ------------------------------------------------ */
 .outline-2,
 .outline-3 {

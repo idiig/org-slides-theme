@@ -147,9 +147,19 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "Escape") { searchInput.value = ""; filterToc(""); searchInput.blur(); }
   });
 
+  function updateSlideVisibility(idx) {
+    document.querySelectorAll(".outline-2 > .outline-3").forEach(function(el) {
+      el.classList.remove("slide-visible");
+    });
+    if (slides[idx].classList.contains("outline-3")) {
+      slides[idx].classList.add("slide-visible");
+    }
+  }
+
   function syncToc() {
     currentIdx = nearestSlideIdx();
     setActive(tocLinkFor(slides[currentIdx]));
+    updateSlideVisibility(currentIdx);
     updateCounter();
     updateBreadcrumb();
   }
@@ -160,6 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(syncToc, 1200);
+    updateSlideVisibility(currentIdx);
     slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
     setActive(tocLinkFor(slides[currentIdx]));
     initSteps(slides[currentIdx], showAll);
