@@ -1,7 +1,7 @@
 # -*- mode: org; -*-
 
 #+OPTIONS: toc:t num:nil html-style:nil ^:nil
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://idiig.github.io/org-slides-theme/slides.css?v=20260514c"/>
-#+HTML_HEAD: <script type="text/javascript" src="https://idiig.github.io/org-slides-theme/slides.js?v=20260514c"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://idiig.github.io/org-slides-theme/slides.css?v=20260514d"/>
+#+HTML_HEAD: <script type="text/javascript" src="https://idiig.github.io/org-slides-theme/slides.js?v=20260514d"></script>
 #+BIND: org-slides-loaded (with-temp-buffer (url-insert-file-contents "https://raw.githubusercontent.com/idiig/org-slides-theme/main/hooks.el") (eval-buffer))
 #+PROPERTY: header-args :eval never-export

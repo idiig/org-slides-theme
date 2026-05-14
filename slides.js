@@ -35,18 +35,30 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key !== SYNC_KEY || !e.newValue) return;
     var msg = JSON.parse(e.newValue);
     var targetIdx = Math.max(0, Math.min(msg.idx, slides.length - 1));
+    var targetStep = Math.max(0, msg.stepIdx || 0);
     receiving = true;
-    goTo(targetIdx, true);
-    clearTimeout(scrollTimer);
-    scrollTimer = null;
-    slides[currentIdx].scrollIntoView({ behavior: "instant", block: "start" });
+    goTo(targetIdx, false);
+    var steps = getSteps(slides[currentIdx]);
+    steps.forEach(function(s, i) {
+      if (i < targetStep) s.classList.remove("step-hidden");
+      else s.classList.add("step-hidden");
+    });
+    stepIdx = targetStep;
+    if (isPresenter) {
+      updatePresenterPanel();
+    } else {
+      updateCounter();
+      clearTimeout(scrollTimer);
+      scrollTimer = null;
+      slides[currentIdx].scrollIntoView({ behavior: "instant", block: "start" });
+    }
     receiving = false;
   });
 
   function broadcast() {
     if (!receiving) {
       localStorage.setItem(SYNC_KEY,
-        JSON.stringify({ idx: currentIdx, ts: Date.now() }));
+        JSON.stringify({ idx: currentIdx, stepIdx: stepIdx, ts: Date.now() }));
     }
   }
 
@@ -54,10 +66,10 @@ document.addEventListener("DOMContentLoaded", function() {
   var presenterPanel = null;
   var pnlTitle, pnlNotes, pnlNext, pnlCounter;
 
-  function getSlideNotes(slide) {
-    var area = slide.querySelector(".outline-text-2, .outline-text-3");
-    if (!area) return [];
-    return Array.from(area.querySelectorAll(":scope > aside.notes"));
+  function noteAfterStep(step) {
+    var container = step.matches("li") ? step.parentElement : step;
+    var next = container.nextElementSibling;
+    return (next && next.matches("aside.notes, aside.NOTES")) ? next : null;
   }
 
   function updatePresenterPanel() {
@@ -65,10 +77,44 @@ document.addEventListener("DOMContentLoaded", function() {
     var slide = slides[currentIdx];
     var h = slide.querySelector("h2, h3");
     pnlTitle.textContent = h ? h.textContent : "";
-    var notes = getSlideNotes(slide);
-    pnlNotes.innerHTML = notes.length
-      ? notes.map(function(n) { return n.innerHTML; }).join("<br>")
-      : "<em style='color:#666'>（セリフなし）</em>";
+
+    pnlNotes.innerHTML = "";
+    var steps = getSteps(slide);
+    if (!steps.length) {
+      // Slide with no steps: show all notes directly
+      var area = slide.querySelector(".outline-text-2, .outline-text-3");
+      if (area) {
+        area.querySelectorAll(":scope > aside.notes, :scope > aside.NOTES").forEach(function(n) {
+          var el = document.createElement("div");
+          el.className = "pnl-note-inline";
+          el.innerHTML = n.innerHTML;
+          pnlNotes.appendChild(el);
+        });
+      }
+    } else {
+      steps.slice(0, stepIdx).forEach(function(step) {
+        var clone = step.cloneNode(true);
+        clone.classList.remove("step-hidden");
+        var stepEl = document.createElement("div");
+        stepEl.className = "pnl-step";
+        stepEl.appendChild(clone);
+        pnlNotes.appendChild(stepEl);
+        var note = noteAfterStep(step);
+        if (note) {
+          var noteEl = document.createElement("div");
+          noteEl.className = "pnl-note-inline";
+          noteEl.innerHTML = note.innerHTML;
+          pnlNotes.appendChild(noteEl);
+        }
+      });
+      if (stepIdx === 0) {
+        var placeholder = document.createElement("em");
+        placeholder.style.color = "#556";
+        placeholder.textContent = "→ 右矢印でスタート";
+        pnlNotes.appendChild(placeholder);
+      }
+    }
+
     var next = slides[currentIdx + 1];
     if (next) {
       var nh = next.querySelector("h2, h3");
@@ -77,7 +123,8 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
       pnlNext.style.display = "none";
     }
-    pnlCounter.textContent = (currentIdx + 1) + " / " + slides.length;
+    pnlCounter.textContent = (currentIdx + 1) + " / " + slides.length +
+      (steps.length ? "  (" + stepIdx + "/" + steps.length + ")" : "");
   }
 
   if (isPresenter) {
@@ -295,13 +342,14 @@ document.addEventListener("DOMContentLoaded", function() {
       e.preventDefault();
       if (zoomed) { closeModal(); goTo(currentIdx + 1, false); return; }
       var steps = getSteps(slides[currentIdx]);
-      if (!isPresenter && stepIdx < steps.length) {
+      if (stepIdx < steps.length) {
         var step = steps[stepIdx];
-        step.classList.remove("step-hidden");
+        if (!isPresenter) step.classList.remove("step-hidden");
         stepIdx++;
         updateCounter();
+        if (isPresenter) updatePresenterPanel();
         broadcast();
-        if (isZoomable(step)) { openModal(step); }
+        if (!isPresenter && isZoomable(step)) { openModal(step); }
       } else {
         goTo(currentIdx + 1, false);
       }
@@ -309,10 +357,11 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
       if (zoomed) { closeModal(); return; }
-      if (!isPresenter && stepIdx > 0) {
+      if (stepIdx > 0) {
         stepIdx--;
-        getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
+        if (!isPresenter) getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
         updateCounter();
+        if (isPresenter) updatePresenterPanel();
         broadcast();
       } else {
         goTo(currentIdx - 1, true);

@@ -429,3 +429,22 @@ em, i     { font-style: italic; }
   font-size: 1rem;
   white-space: pre-wrap;
 }
+
+/* --- Presenter inline steps + notes ----------------------- */
+.pnl-step {
+  margin-bottom: 0.4rem;
+  color: #ddd;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+.pnl-step li { list-style: disc; margin-left: 1.5rem; }
+.pnl-note-inline {
+  margin: 0.3rem 0 0.8rem 1.5rem;
+  padding: 0.4rem 0.9rem;
+  background: rgba(240,192,64,0.12);
+  border-left: 3px solid #f0c040;
+  border-radius: 0 3px 3px 0;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #f0e0a0;
+}
