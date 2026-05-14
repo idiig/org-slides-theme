@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var preNotes = [];
       if (area && steps.length) {
         var node = area.firstElementChild;
-        while (node && node !== steps[0]) {
+        while (node && node !== steps[0].parentElement) {
           if (node.matches("aside.notes, aside.NOTES")) preNotes.push(node);
           node = node.nextElementSibling;
         }
