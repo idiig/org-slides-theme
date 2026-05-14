@@ -35,9 +35,7 @@ Consecutive # lines are joined into one aside; bare # lines are deleted."
                   text)))
       text)))
 
-;; Remove any lambda-based registrations left over from old dir-locals.el
-(setq org-export-before-parsing-hook
-      (cl-remove-if-not #'symbolp org-export-before-parsing-hook))
+(setq org-export-before-parsing-hook nil)
 (add-hook 'org-export-before-parsing-hook 'org-slides-export-notes)
 
 (unless (memq 'org-slides-normalize-aside-notes org-export-filter-final-output-functions)
