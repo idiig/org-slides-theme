@@ -263,22 +263,52 @@ document.addEventListener("DOMContentLoaded", function() {
     broadcast();
   }
 
+  // Lightbox
+  var modal = document.createElement("div");
+  modal.id = "code-modal";
+  modal.innerHTML = "<div id=\"code-modal-inner\"></div>";
+  document.body.appendChild(modal);
+  var zoomed = false;
+
+  function isZoomable(el) {
+    return el && el.matches(".figure, figure, table, div.org-src-container");
+  }
+  function openModal(el) {
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(".step-hidden").forEach(function(c) { c.classList.remove("step-hidden"); });
+    var inner = document.getElementById("code-modal-inner");
+    inner.innerHTML = "";
+    inner.appendChild(clone);
+    modal.classList.add("active");
+    zoomed = true;
+  }
+  function closeModal() {
+    modal.classList.remove("active");
+    zoomed = false;
+  }
+  modal.addEventListener("click", closeModal);
+
   document.addEventListener("keydown", function(e) {
     if (e.target.tagName === "INPUT") return;
+    if (e.key === "Escape") { if (zoomed) { e.preventDefault(); closeModal(); } return; }
     if (e.key === "ArrowRight") {
       e.preventDefault();
+      if (zoomed) { closeModal(); goTo(currentIdx + 1, false); return; }
       var steps = getSteps(slides[currentIdx]);
       if (!isPresenter && stepIdx < steps.length) {
-        steps[stepIdx].classList.remove("step-hidden");
+        var step = steps[stepIdx];
+        step.classList.remove("step-hidden");
         stepIdx++;
         updateCounter();
         broadcast();
+        if (isZoomable(step)) { openModal(step); }
       } else {
         goTo(currentIdx + 1, false);
       }
     }
     if (e.key === "ArrowLeft") {
       e.preventDefault();
+      if (zoomed) { closeModal(); return; }
       if (!isPresenter && stepIdx > 0) {
         stepIdx--;
         getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
@@ -288,35 +318,7 @@ document.addEventListener("DOMContentLoaded", function() {
         goTo(currentIdx - 1, true);
       }
     }
-    if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); goTo(currentIdx + 1, true); }
-    if (e.key === "ArrowUp"   || e.key === "PageUp")   { e.preventDefault(); goTo(currentIdx - 1, true); }
-  });
-
-  syncToc();
-
-  // Code block lightbox
-  var modal = document.createElement("div");
-  modal.id = "code-modal";
-  modal.innerHTML = "<div id=\"code-modal-inner\"></div>";
-  document.body.appendChild(modal);
-
-  function openModal(srcContainer) {
-    var clone = srcContainer.cloneNode(true);
-    clone.querySelectorAll(".step-hidden").forEach(function(el) { el.classList.remove("step-hidden"); });
-    var inner = document.getElementById("code-modal-inner");
-    inner.innerHTML = "";
-    inner.appendChild(clone);
-    modal.classList.add("active");
-  }
-  function closeModal() { modal.classList.remove("active"); }
-
-  document.querySelectorAll("div.org-src-container").forEach(function(el) {
-    el.style.cursor = "pointer";
-    el.addEventListener("click", function(e) { e.stopPropagation(); openModal(el); });
-  });
-
-  modal.addEventListener("click", closeModal);
-  document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape" && modal.classList.contains("active")) { closeModal(); }
+    if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); if (zoomed) closeModal(); goTo(currentIdx + 1, true); }
+    if (e.key === "ArrowUp"   || e.key === "PageUp")   { e.preventDefault(); if (zoomed) closeModal(); goTo(currentIdx - 1, true); }
   });
 });
