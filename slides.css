@@ -296,6 +296,11 @@ tr:nth-child(even) { background: var(--color-surface); }
   z-index: 100;
 }
 
+/* --- Step (bullet reveal) ---------------------------------- */
+.step-hidden {
+  visibility: hidden;
+}
+
 /* --- Misc -------------------------------------------------- */
 strong, b { color: var(--color-accent2); font-weight: 700; }
 em, i     { font-style: italic; }

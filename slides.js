@@ -58,13 +58,41 @@ document.addEventListener("DOMContentLoaded", function() {
   var currentIdx  = 0;
   var scrollTimer = null;
 
+  // --- Step (bullet reveal) logic ---
+  var stepIdx = 0;
+
+  function getSteps(slideEl) {
+    var area = slideEl.querySelector(".outline-text-2, .outline-text-3");
+    if (!area) return [];
+    return Array.from(area.querySelectorAll(":scope > ul > li, :scope > ol > li"));
+  }
+
+  function initSteps(slideEl, showAll) {
+    var steps = getSteps(slideEl);
+    if (showAll || !steps.length) {
+      steps.forEach(function(li) { li.classList.remove("step-hidden"); });
+      stepIdx = steps.length;
+    } else {
+      steps.forEach(function(li) { li.classList.add("step-hidden"); });
+      stepIdx = 0;
+    }
+  }
+
+  // --- Counter ---
   var counter = document.createElement("div");
   counter.className = "slide-counter";
   document.body.appendChild(counter);
   function updateCounter() {
-    counter.textContent = (currentIdx + 1) + " / " + slides.length;
+    var steps = getSteps(slides[currentIdx]);
+    if (steps.length && stepIdx < steps.length) {
+      counter.textContent = (currentIdx + 1) + " / " + slides.length +
+                            "  (" + stepIdx + "/" + steps.length + ")";
+    } else {
+      counter.textContent = (currentIdx + 1) + " / " + slides.length;
+    }
   }
 
+  // --- Breadcrumb ---
   var breadcrumb = document.createElement("div");
   breadcrumb.className = "slide-breadcrumb";
   document.body.appendChild(breadcrumb);
@@ -84,6 +112,7 @@ document.addEventListener("DOMContentLoaded", function() {
     breadcrumb.textContent = parts.join(" » ");
   }
 
+  // --- TOC search ---
   function filterToc(query) {
     var q = query.toLowerCase().trim();
     var allLi = Array.from(document.querySelectorAll("#text-table-of-contents li"));
@@ -110,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var q = searchInput.value.toLowerCase().trim();
       for (var i = 0; i < slides.length; i++) {
         var h = slides[i].querySelector("h2, h3");
-        if (h && h.textContent.toLowerCase().includes(q)) { goTo(i); searchInput.blur(); break; }
+        if (h && h.textContent.toLowerCase().includes(q)) { goTo(i, true); searchInput.blur(); break; }
       }
     }
     if (e.key === "Escape") { searchInput.value = ""; filterToc(""); searchInput.blur(); }
@@ -125,20 +154,42 @@ document.addEventListener("DOMContentLoaded", function() {
 
   content.addEventListener("scrollend", syncToc);
 
-  function goTo(idx) {
+  function goTo(idx, showAll) {
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(syncToc, 1200);
     slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
     setActive(tocLinkFor(slides[currentIdx]));
+    initSteps(slides[currentIdx], showAll);
     updateCounter();
     updateBreadcrumb();
   }
 
   document.addEventListener("keydown", function(e) {
     if (e.target.tagName === "INPUT") return;
-    if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); goTo(currentIdx + 1); }
-    if (e.key === "ArrowUp"   || e.key === "PageUp")   { e.preventDefault(); goTo(currentIdx - 1); }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      var steps = getSteps(slides[currentIdx]);
+      if (stepIdx < steps.length) {
+        steps[stepIdx].classList.remove("step-hidden");
+        stepIdx++;
+        updateCounter();
+      } else {
+        goTo(currentIdx + 1, false);
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (stepIdx > 0) {
+        stepIdx--;
+        getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
+        updateCounter();
+      } else {
+        goTo(currentIdx - 1, true);
+      }
+    }
+    if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); goTo(currentIdx + 1, true); }
+    if (e.key === "ArrowUp"   || e.key === "PageUp")   { e.preventDefault(); goTo(currentIdx - 1, true); }
   });
 
   syncToc();
