@@ -123,50 +123,16 @@ document.addEventListener("DOMContentLoaded", function() {
     pnlTitle.textContent = h ? h.textContent : "";
 
     pnlNotes.innerHTML = "";
-    var steps = getSteps(slide);
-    if (!steps.length) {
-      // Slide with no steps: show all notes directly
-      var area = slide.querySelector(".outline-text-2, .outline-text-3");
-      if (area) {
-        area.querySelectorAll(":scope > aside.notes, :scope > aside.NOTES").forEach(function(n) {
-          var el = document.createElement("div");
-          el.className = "pnl-note-inline";
-          el.innerHTML = n.innerHTML;
-          pnlNotes.appendChild(el);
-        });
-      }
-    } else {
-      // Notes before the first step (shown immediately on slide entry)
-      var area = slide.querySelector(".outline-text-2, .outline-text-3");
-      var preNotes = [];
-      if (area && steps.length) {
-        var node = area.firstElementChild;
-        while (node && node !== steps[0]) {
-          if (node.matches("aside.notes, aside.NOTES")) preNotes.push(node);
-          node = node.nextElementSibling;
-        }
-      }
-      preNotes.forEach(function(n) {
-        var el = document.createElement("div");
-        el.className = "pnl-note-inline";
-        el.innerHTML = n.innerHTML;
-        pnlNotes.appendChild(el);
-      });
-
-      steps.slice(0, stepIdx).forEach(function(step) {
-        var note = noteAfterStep(step);
-        if (note) {
-          var noteEl = document.createElement("div");
-          noteEl.className = "pnl-note-inline";
-          noteEl.innerHTML = note.innerHTML;
-          pnlNotes.appendChild(noteEl);
-        }
-      });
-      if (stepIdx === 0 && preNotes.length === 0) {
-        var placeholder = document.createElement("em");
-        placeholder.style.color = "#556";
-        placeholder.textContent = "→ 右矢印でスタート";
-        pnlNotes.appendChild(placeholder);
+    if (noteBlocks.length > 0 && noteBlockIdx < noteBlocks.length) {
+      var el = document.createElement("div");
+      el.className = "pnl-note-inline";
+      el.innerHTML = noteBlocks[noteBlockIdx].innerHTML;
+      pnlNotes.appendChild(el);
+      if (noteBlocks.length > 1) {
+        var pg = document.createElement("div");
+        pg.style.cssText = "font-size:0.7rem;color:#556;margin-top:0.4rem;font-family:monospace";
+        pg.textContent = (noteBlockIdx + 1) + " / " + noteBlocks.length;
+        pnlNotes.appendChild(pg);
       }
     }
 
@@ -240,6 +206,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // --- Step logic ---
   var stepIdx = 0;
+
+  // --- Note block logic (presenter) ---
+  var noteBlockIdx = 0;
+  var noteBlocks = getSlideNoteBlocks(slides[0]);
+
+  function getSlideNoteBlocks(slide) {
+    var area = slide.querySelector(".outline-text-2, .outline-text-3");
+    if (!area) return [];
+    return Array.from(area.querySelectorAll(":scope > aside.notes, :scope > aside.NOTES"));
+  }
 
   function getSteps(slideEl) {
     var area = slideEl.querySelector(".outline-text-2, .outline-text-3");
@@ -353,6 +329,8 @@ document.addEventListener("DOMContentLoaded", function() {
     clearPendingZoom();
     if (zoomed) { zoomed = false; if (!isPresenter) closeModal(); }
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
+    noteBlockIdx = 0;
+    noteBlocks = getSlideNoteBlocks(slides[currentIdx]);
     clearTimeout(scrollTimer);
     if (!isPresenter) scrollTimer = setTimeout(syncToc, 1200);
     updateSlideVisibility(currentIdx);
@@ -426,6 +404,11 @@ document.addEventListener("DOMContentLoaded", function() {
         broadcast();
         return;
       }
+      if (isPresenter && noteBlockIdx < noteBlocks.length - 1) {
+        noteBlockIdx++;
+        updatePresenterPanel();
+        return;
+      }
       var steps = getSteps(slides[currentIdx]);
       if (stepIdx < steps.length) {
         var step = steps[stepIdx];
@@ -461,6 +444,11 @@ document.addEventListener("DOMContentLoaded", function() {
           if (isPresenter) updatePresenterPanel();
           broadcast();
         }
+        return;
+      }
+      if (isPresenter && noteBlockIdx > 0) {
+        noteBlockIdx--;
+        updatePresenterPanel();
         return;
       }
       if (stepIdx > 0) {
