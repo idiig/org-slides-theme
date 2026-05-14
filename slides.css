@@ -61,7 +61,9 @@ body {
   line-height: 1.45;
   border-bottom: 1px solid rgba(0,0,0,0.15);
   text-decoration: none;
+  cursor: pointer;
 }
+.sidebar-title:hover { background: #1a6a9a; }
 
 #table-of-contents h2 {
   font-size: 0.72rem;

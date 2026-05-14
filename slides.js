@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
     titleSpan.textContent = titleEl.textContent;
     titleDiv.appendChild(titleSpan);
     toc.insertBefore(titleDiv, toc.firstChild);
+    titleDiv.addEventListener("click", function() { goTo(0, true); });
   }
   var searchInput = document.createElement("input");
   searchInput.type = "text";
