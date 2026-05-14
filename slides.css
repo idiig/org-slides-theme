@@ -192,6 +192,9 @@ h1.title {
   line-height: 2;
   margin: 0;
 }
+#org-title-slide .outline-text-2 {
+  flex: none;
+}
 
 /* --- Child slides hidden until navigated to ---------------- */
 .outline-2 > .outline-3 {
