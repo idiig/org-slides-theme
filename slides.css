@@ -310,11 +310,11 @@ tr:nth-child(even) { background: var(--color-surface); }
 }
 
 /* --- Speaker notes ----------------------------------------- */
-aside.notes {
+aside.notes, aside.NOTES {
   display: none;
 }
 
-body.presenter aside.notes {
+body.presenter aside.notes, body.presenter aside.NOTES {
   display: block;
   margin-top: 1.5rem;
   padding: 0.6rem 1.2rem;
@@ -325,7 +325,10 @@ body.presenter aside.notes {
   line-height: 1.85;
   color: #444;
 }
-body.presenter aside.notes + aside.notes {
+body.presenter aside.notes + aside.notes,
+body.presenter aside.NOTES + aside.NOTES,
+body.presenter aside.notes + aside.NOTES,
+body.presenter aside.NOTES + aside.notes {
   margin-top: 0;
   border-top: 1px solid #f5e090;
   border-radius: 0;
