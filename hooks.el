@@ -35,8 +35,8 @@ Consecutive # lines are joined into one aside; bare # lines are deleted."
                   text)))
       text)))
 
-(unless (memq 'org-slides-export-notes org-export-before-parsing-hook)
-  (add-hook 'org-export-before-parsing-hook 'org-slides-export-notes))
+(unless (memq 'org-slides-export-notes org-export-before-parsing-functions)
+  (add-hook 'org-export-before-parsing-functions 'org-slides-export-notes))
 
 (unless (memq 'org-slides-normalize-aside-notes org-export-filter-final-output-functions)
   (add-to-list 'org-export-filter-final-output-functions
