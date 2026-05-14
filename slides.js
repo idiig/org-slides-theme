@@ -406,7 +406,11 @@ document.addEventListener("DOMContentLoaded", function() {
   updateSlideVisibility(0);
   updateCounter();
   updateBreadcrumb();
-  if (isPresenter) updatePresenterPanel();
+  if (isPresenter) {
+    updatePresenterPanel();
+  } else {
+    slides[0].scrollIntoView({ behavior: "instant", block: "start" });
+  }
 
   document.addEventListener("keydown", function(e) {
     if (e.target.tagName === "INPUT") return;
