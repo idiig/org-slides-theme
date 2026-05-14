@@ -407,7 +407,11 @@ document.addEventListener("DOMContentLoaded", function() {
         broadcast();
         if (!isPresenter && isZoomable(step)) { pendingZoom = true; pendingZoomEl = step; }
       } else {
-        goTo(currentIdx + 1, false);
+        if (currentIdx === slides.length - 1) {
+          goTo(0, true);
+        } else {
+          goTo(currentIdx + 1, false);
+        }
       }
     }
     if (e.key === "ArrowLeft") {
