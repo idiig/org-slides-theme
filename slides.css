@@ -186,6 +186,12 @@ h1.title {
   font-size: 0.88rem;
   line-height: 2;
 }
+#org-title-slide .author {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 2;
+  margin: 0;
+}
 
 /* --- Child slides hidden until navigated to ---------------- */
 .outline-2 > .outline-3 {
