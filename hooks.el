@@ -24,10 +24,11 @@
                   text)))
       text)))
 
-(add-hook 'org-export-before-processing-hook
-          'org-slides-export-notes nil t)
+(unless (memq 'org-slides-export-notes org-export-before-parsing-hook)
+  (add-hook 'org-export-before-parsing-hook 'org-slides-export-notes))
 
-(add-to-list 'org-export-filter-final-output-functions
-             'org-slides-normalize-aside-notes)
+(unless (memq 'org-slides-normalize-aside-notes org-export-filter-final-output-functions)
+  (add-to-list 'org-export-filter-final-output-functions
+               'org-slides-normalize-aside-notes))
 
 (provide 'org-slides-hooks)
