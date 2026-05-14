@@ -1,6 +1,6 @@
 # -*- mode: org; -*-
 
 #+OPTIONS: toc:t num:nil html-style:nil ^:nil
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://idiig.github.io/org-slides-theme/slides.css"/>
-#+HTML_HEAD: <script type="text/javascript" src="https://idiig.github.io/org-slides-theme/slides.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://idiig.github.io/org-slides-theme/slides.css?v=20260514"/>
+#+HTML_HEAD: <script type="text/javascript" src="https://idiig.github.io/org-slides-theme/slides.js?v=20260514"></script>
 #+PROPERTY: header-args :eval never-export
