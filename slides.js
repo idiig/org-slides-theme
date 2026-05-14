@@ -34,20 +34,12 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("storage", function(e) {
     if (e.key !== SYNC_KEY || !e.newValue) return;
     var msg = JSON.parse(e.newValue);
-    currentIdx = Math.max(0, Math.min(msg.idx, slides.length - 1));
+    var targetIdx = Math.max(0, Math.min(msg.idx, slides.length - 1));
+    receiving = true;
+    goTo(targetIdx, true);
     clearTimeout(scrollTimer);
-    updateSlideVisibility(currentIdx);
-    if (!isPresenter) {
-      var cRect = content.getBoundingClientRect();
-      var sRect = slides[currentIdx].getBoundingClientRect();
-      content.scrollTop += sRect.top - cRect.top;
-    }
-    setActive(tocLinkFor(slides[currentIdx]));
-    initSteps(slides[currentIdx], true);
-    stepIdx = getSteps(slides[currentIdx]).length;
-    updateCounter();
-    updateBreadcrumb();
-    if (isPresenter) updatePresenterPanel();
+    scrollTimer = null;
+    receiving = false;
   });
 
   function broadcast() {
