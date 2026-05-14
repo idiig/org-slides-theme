@@ -34,16 +34,22 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("storage", function(e) {
     if (e.key !== SYNC_KEY || !e.newValue) return;
     var msg = JSON.parse(e.newValue);
-    receiving = true;
-    if (msg.idx !== currentIdx) goTo(msg.idx, true);
+    currentIdx = Math.max(0, Math.min(msg.idx, slides.length - 1));
+    clearTimeout(scrollTimer);
+    if (!isPresenter) {
+      slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    updateSlideVisibility(currentIdx);
+    setActive(tocLinkFor(slides[currentIdx]));
+    initSteps(slides[currentIdx], true);
     var steps = getSteps(slides[currentIdx]);
     steps.forEach(function(li, i) {
       li.classList.toggle("step-hidden", i >= msg.stepIdx);
     });
     stepIdx = msg.stepIdx;
     updateCounter();
+    updateBreadcrumb();
     if (isPresenter) updatePresenterPanel();
-    receiving = false;
   });
 
   function broadcast() {
