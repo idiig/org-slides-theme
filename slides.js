@@ -39,6 +39,16 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     titleSlide.appendChild(notesDiv);
     content.insertBefore(titleSlide, firstOutline);
+
+    // Pull p.author from #postamble into title slide
+    var postamble = document.getElementById("postamble");
+    if (postamble) {
+      var authorP = postamble.querySelector("p.author");
+      if (authorP) {
+        authorP.textContent = authorP.textContent.replace(/^Author:\s*/, "");
+        titleSlide.insertBefore(authorP, notesDiv);
+      }
+    }
   })();
 
   var slides = Array.from(document.querySelectorAll(".outline-2, .outline-3"));
