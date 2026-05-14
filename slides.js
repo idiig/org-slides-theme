@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
     goTo(targetIdx, true);
     clearTimeout(scrollTimer);
     scrollTimer = null;
+    slides[currentIdx].scrollIntoView({ behavior: "instant", block: "start" });
     receiving = false;
   });
 
