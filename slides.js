@@ -42,11 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
     updateSlideVisibility(currentIdx);
     setActive(tocLinkFor(slides[currentIdx]));
     initSteps(slides[currentIdx], true);
-    var steps = getSteps(slides[currentIdx]);
-    steps.forEach(function(li, i) {
-      li.classList.toggle("step-hidden", i >= msg.stepIdx);
-    });
-    stepIdx = msg.stepIdx;
+    stepIdx = getSteps(slides[currentIdx]).length;
     updateCounter();
     updateBreadcrumb();
     if (isPresenter) updatePresenterPanel();
@@ -55,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function broadcast() {
     if (!receiving) {
       localStorage.setItem(SYNC_KEY,
-        JSON.stringify({ idx: currentIdx, stepIdx: stepIdx, ts: Date.now() }));
+        JSON.stringify({ idx: currentIdx, ts: Date.now() }));
     }
   }
 
