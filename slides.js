@@ -36,10 +36,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var msg = JSON.parse(e.newValue);
     currentIdx = Math.max(0, Math.min(msg.idx, slides.length - 1));
     clearTimeout(scrollTimer);
-    if (!isPresenter) {
-      slides[currentIdx].scrollIntoView({ behavior: "smooth", block: "start" });
-    }
     updateSlideVisibility(currentIdx);
+    if (!isPresenter) {
+      var cRect = content.getBoundingClientRect();
+      var sRect = slides[currentIdx].getBoundingClientRect();
+      content.scrollTop += sRect.top - cRect.top;
+    }
     setActive(tocLinkFor(slides[currentIdx]));
     initSteps(slides[currentIdx], true);
     stepIdx = getSteps(slides[currentIdx]).length;
