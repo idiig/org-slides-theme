@@ -84,6 +84,13 @@ document.addEventListener("DOMContentLoaded", function() {
     if (isPresenter) {
       updatePresenterPanel();
     } else {
+      if (msg.zoomed && !zoomed) {
+        var zSteps = getSteps(slides[currentIdx]);
+        var zEl = stepIdx > 0 ? zSteps[stepIdx - 1] : null;
+        if (zEl && isZoomable(zEl)) { zoomed = true; openModal(zEl); }
+      } else if (!msg.zoomed && zoomed) {
+        zoomed = false; closeModal();
+      }
       updateCounter();
       clearTimeout(scrollTimer);
       scrollTimer = null;
@@ -95,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function broadcast() {
     if (!receiving) {
       localStorage.setItem(SYNC_KEY,
-        JSON.stringify({ idx: currentIdx, stepIdx: stepIdx, ts: Date.now() }));
+        JSON.stringify({ idx: currentIdx, stepIdx: stepIdx, zoomed: zoomed, ts: Date.now() }));
     }
   }
 
@@ -344,6 +351,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function goTo(idx, showAll) {
     clearPendingZoom();
+    if (zoomed) { zoomed = false; if (!isPresenter) closeModal(); }
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
     clearTimeout(scrollTimer);
     if (!isPresenter) scrollTimer = setTimeout(syncToc, 1200);
@@ -378,25 +386,46 @@ document.addEventListener("DOMContentLoaded", function() {
     inner.innerHTML = "";
     inner.appendChild(clone);
     modal.classList.add("active");
-    zoomed = true;
   }
   function closeModal() {
     modal.classList.remove("active");
-    zoomed = false;
   }
   function clearPendingZoom() {
     pendingZoom = false;
     pendingZoomEl = null;
   }
-  modal.addEventListener("click", closeModal);
+  modal.addEventListener("click", function() {
+    zoomed = false;
+    closeModal();
+    broadcast();
+  });
 
   document.addEventListener("keydown", function(e) {
     if (e.target.tagName === "INPUT") return;
-    if (e.key === "Escape") { if (zoomed) { e.preventDefault(); closeModal(); } return; }
+    if (e.key === "Escape") {
+      if (zoomed) {
+        e.preventDefault();
+        zoomed = false;
+        if (!isPresenter) closeModal();
+        broadcast();
+      }
+      return;
+    }
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      if (zoomed) { closeModal(); return; }
-      if (pendingZoom) { openModal(pendingZoomEl); clearPendingZoom(); return; }
+      if (zoomed) {
+        zoomed = false;
+        if (!isPresenter) closeModal();
+        broadcast();
+        return;
+      }
+      if (pendingZoom) {
+        zoomed = true;
+        pendingZoom = false;
+        if (!isPresenter) openModal(pendingZoomEl);
+        broadcast();
+        return;
+      }
       var steps = getSteps(slides[currentIdx]);
       if (stepIdx < steps.length) {
         var step = steps[stepIdx];
@@ -405,7 +434,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateCounter();
         if (isPresenter) updatePresenterPanel();
         broadcast();
-        if (!isPresenter && isZoomable(step)) { pendingZoom = true; pendingZoomEl = step; }
+        if (isZoomable(step)) { pendingZoom = true; pendingZoomEl = step; }
       } else {
         if (currentIdx === slides.length - 1) {
           goTo(0, true);
@@ -416,8 +445,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      if (zoomed) { closeModal(); return; }
-      if (pendingZoom) { clearPendingZoom(); return; }
+      if (zoomed) {
+        zoomed = false;
+        if (!isPresenter) closeModal();
+        pendingZoom = true;
+        broadcast();
+        return;
+      }
+      if (pendingZoom) {
+        clearPendingZoom();
+        if (stepIdx > 0) {
+          stepIdx--;
+          if (!isPresenter) getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
+          updateCounter();
+          if (isPresenter) updatePresenterPanel();
+          broadcast();
+        }
+        return;
+      }
       if (stepIdx > 0) {
         stepIdx--;
         if (!isPresenter) getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
@@ -428,7 +473,15 @@ document.addEventListener("DOMContentLoaded", function() {
         goTo(currentIdx - 1, true);
       }
     }
-    if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); if (zoomed) closeModal(); goTo(currentIdx + 1, true); }
-    if (e.key === "ArrowUp"   || e.key === "PageUp")   { e.preventDefault(); if (zoomed) closeModal(); goTo(currentIdx - 1, true); }
+    if (e.key === "ArrowDown" || e.key === "PageDown") {
+      e.preventDefault();
+      if (zoomed) { zoomed = false; if (!isPresenter) closeModal(); }
+      goTo(currentIdx + 1, true);
+    }
+    if (e.key === "ArrowUp" || e.key === "PageUp") {
+      e.preventDefault();
+      if (zoomed) { zoomed = false; if (!isPresenter) closeModal(); }
+      goTo(currentIdx - 1, true);
+    }
   });
 });
