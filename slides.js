@@ -1,3 +1,5 @@
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
 document.addEventListener("DOMContentLoaded", function() {
   var toc     = document.getElementById("table-of-contents");
   var content = document.getElementById("content");
