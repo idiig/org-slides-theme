@@ -450,12 +450,15 @@ em, i     { font-style: italic; }
 #code-modal.active { display: flex; }
 #code-modal-inner {
   background: var(--color-bg, #fff);
-  border-radius: 6px;
   padding: 1.5rem;
   max-width: 90vw;
-  max-height: 90vh;
+  height: 100vh;
   overflow: auto;
   box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+#code-modal-inner img {
+  max-height: calc(100vh - 3rem);
+  width: auto;
 }
 #code-modal-inner div.org-src-container {
   cursor: default;
