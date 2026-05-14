@@ -140,8 +140,9 @@ document.addEventListener("DOMContentLoaded", function() {
       var area = slide.querySelector(".outline-text-2, .outline-text-3");
       var preNotes = [];
       if (area && steps.length) {
+        var firstStepContainer = steps[0].parentElement === area ? steps[0] : steps[0].parentElement;
         var node = area.firstElementChild;
-        while (node && node !== steps[0].parentElement) {
+        while (node && node !== firstStepContainer) {
           if (node.matches("aside.notes, aside.NOTES")) preNotes.push(node);
           node = node.nextElementSibling;
         }
