@@ -343,6 +343,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function goTo(idx, showAll) {
+    clearPendingZoom();
     currentIdx = Math.max(0, Math.min(idx, slides.length - 1));
     clearTimeout(scrollTimer);
     if (!isPresenter) scrollTimer = setTimeout(syncToc, 1200);
@@ -364,6 +365,8 @@ document.addEventListener("DOMContentLoaded", function() {
   modal.innerHTML = "<div id=\"code-modal-inner\"></div>";
   document.body.appendChild(modal);
   var zoomed = false;
+  var pendingZoom = false;
+  var pendingZoomEl = null;
 
   function isZoomable(el) {
     return el && el.matches(".figure, figure, table, div.org-src-container");
@@ -381,6 +384,10 @@ document.addEventListener("DOMContentLoaded", function() {
     modal.classList.remove("active");
     zoomed = false;
   }
+  function clearPendingZoom() {
+    pendingZoom = false;
+    pendingZoomEl = null;
+  }
   modal.addEventListener("click", closeModal);
 
   document.addEventListener("keydown", function(e) {
@@ -389,6 +396,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "ArrowRight") {
       e.preventDefault();
       if (zoomed) { closeModal(); goTo(currentIdx + 1, false); return; }
+      if (pendingZoom) { openModal(pendingZoomEl); clearPendingZoom(); return; }
       var steps = getSteps(slides[currentIdx]);
       if (stepIdx < steps.length) {
         var step = steps[stepIdx];
@@ -397,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateCounter();
         if (isPresenter) updatePresenterPanel();
         broadcast();
-        if (!isPresenter && isZoomable(step)) { openModal(step); }
+        if (!isPresenter && isZoomable(step)) { pendingZoom = true; pendingZoomEl = step; }
       } else {
         goTo(currentIdx + 1, false);
       }
@@ -405,6 +413,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
       if (zoomed) { closeModal(); return; }
+      if (pendingZoom) { clearPendingZoom(); return; }
       if (stepIdx > 0) {
         stepIdx--;
         if (!isPresenter) getSteps(slides[currentIdx])[stepIdx].classList.add("step-hidden");
