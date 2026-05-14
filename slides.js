@@ -64,7 +64,9 @@ document.addEventListener("DOMContentLoaded", function() {
   function getSteps(slideEl) {
     var area = slideEl.querySelector(".outline-text-2, .outline-text-3");
     if (!area) return [];
-    return Array.from(area.querySelectorAll(":scope > ul > li, :scope > ol > li"));
+    return Array.from(area.querySelectorAll(
+      ":scope > ul > li, :scope > ol > li, :scope > .figure, :scope > figure, :scope > table"
+    ));
   }
 
   function initSteps(slideEl, showAll) {
