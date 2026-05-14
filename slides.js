@@ -400,6 +400,13 @@ document.addEventListener("DOMContentLoaded", function() {
     broadcast();
   });
 
+  // Initialize slide 0 state on page load
+  initSteps(slides[0], false);
+  updateSlideVisibility(0);
+  updateCounter();
+  updateBreadcrumb();
+  if (isPresenter) updatePresenterPanel();
+
   document.addEventListener("keydown", function(e) {
     if (e.target.tagName === "INPUT") return;
     if (e.key === "Escape") {
