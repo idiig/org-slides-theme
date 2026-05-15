@@ -17,7 +17,7 @@
   --color-sidebar-hd:#272525;
   --color-sidebar-fg:#d9d9d9;
   --font-sans:       "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
-  --font-mono:       "Noto Sans Mono", "Source Code Pro", monospace;
+  --font-mono:       "Noto Sans Mono", "Source Code Pro", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "IPAGothic", monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
